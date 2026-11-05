@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 from app.exceptions.indexing_exceptions import DocumentProcessingError
 from app.models.blocks import BlocksContainer
 from app.utils.converters.docling_doc_to_blocks import DoclingDocToBlocksConverter
-from app.utils.lazy_heavy import ensure_docling
+from app.utils.lazy_heavy import ensure_docling, require_off_loop
 from app.utils.pdf_utils import PAGE_BATCH_SIZE, get_pdf_page_count  # noqa: F401 - re-exported
 from app.utils.pool_worker import run_and_release, start_housekeeping
 from app.utils.worker_scaling import scaled
@@ -170,6 +170,7 @@ class DoclingProcessor():
     def converter(self) -> "DocumentConverter":
         """The shared converter, built on first use. Imports ``docling``: call it from a
         worker thread, or after ``await ensure_docling()``."""
+        require_off_loop()
         return _get_converter()
 
     async def parse_document(
