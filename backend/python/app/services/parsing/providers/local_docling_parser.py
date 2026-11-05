@@ -8,8 +8,6 @@ import asyncio
 from pathlib import Path
 from typing import Any
 
-from docling.exceptions import ConversionError
-
 from app.modules.parsers.pdf.docling_processor import DoclingProcessor
 from app.services.parsing.interface import (
     IParser,
@@ -18,6 +16,7 @@ from app.services.parsing.interface import (
     ParseResult,
     ParserProvider,
 )
+from app.utils.lazy_heavy import ensure_docling
 
 _SUPPORTED_FORMATS = ["pdf", "docx", "doc", "pptx", "ppt", "md", "mdx"]
 
@@ -51,6 +50,9 @@ class LocalDoclingParser:
         target_ext = _FORMAT_EXTS.get(ext, Path(record_name).suffix)
         stem = Path(record_name).stem
         doc_name = f"{stem}{target_ext}"
+
+        await ensure_docling()
+        from docling.exceptions import ConversionError
 
         try:
             conv_res = await self._processor.parse_document(doc_name, content)
